@@ -73,4 +73,61 @@ else
 fi
 
 
+
+#test container
+
+echo "Would you like to install radarr (Required)? (y/n/e)"
+
+read yesorno
+
+if [ "$yesorno" = y ]; then
+	docker run -d \
+  --name=radarr \
+  -e PUID=1000 \
+  -e PGID=1000 \
+  -e TZ=Europe/London \
+  -p 7878:7878 \
+  -v /path/to/data:/config \
+  -v /path/to/movies:/movies `#optional` \
+  -v /path/to/downloadclient-downloads:/downloads `#optional` \
+  --restart unless-stopped \
+  lscr.io/linuxserver/radarr
+	echo " "
+	echo "Completed."
+	echo " "
+elif [ "$yesorno" = n ]; then
+	echo "Skipping..."
+	echo " "
+else
+	echo "Not a valid answer. Exiting..."
+	exit 1
+fi
+
+#test2
+#test container
+
+echo "Would you like to install test2 (Required)? (y/n/e)"
+
+read yesorno
+
+if [ "$yesorno" = y ]; then
+	docker run -d \
+  -p 8000:8000 -p 9000:9000 \
+  --name portainer \
+  --restart=always \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v portainer_data:/data \
+  cr.portainer.io/portainer/portainer-ce:latest
+	echo " "
+	echo "Completed."
+	echo " "
+elif [ "$yesorno" = n ]; then
+	echo "Skipping..."
+	echo " "
+else
+	echo "Not a valid answer. Exiting..."
+	exit 1
+fi
+
+
 echo "Installer Complete. Goodbye!"
