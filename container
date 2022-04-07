@@ -1,0 +1,46 @@
+#!/bin/bash
+
+echo "
+___  ____ _  _ ____    _ _  _ ____ ___ ____ _    _    ____ ____
+  /  |___ |  | [__     | |\ | [__   |  |__| |    |    |___ |__/
+ /__ |___ |__| ___]    | | \| ___]  |  |  | |___ |___ |___ |  \
+
+"
+
+#This is a script to help install essentials for docker.
+
+#This script will install portainer, sonarr, radarr, and jackett.
+
+######################################################################
+
+#Install Portainer
+
+echo "Would you like to install Portainer (Required if not already insalled)? (y/n/e)"
+
+read yesorno
+
+if [ "$yesorno" = y ]; then
+	echo "portainer:
+  container_name: portainer
+  restart: unless-stopped
+  ports:
+   - 9000:9000
+  volumes:
+   - /var/run/docker.sock:/var/run/docker.sock
+   - /home/dockeras/portainer:/data
+  environment:
+   - PUID=1000
+   - PGID=150
+   - TZ=US/Eastern
+  image: portainer/portainer" >> /home/$USER/arch-docker/docker-compose.yml		#replace /home/$USER/arch-docker/docker-compose.yml with the location of your docker-compose.yml file
+echo " " >>/home/$USER/arch-docker/docker-compose.yml #replace this location with the location docker-compose.yml if needed.
+echo "Successfully Added"
+elif [ "$yesorno" = n ]; then
+	echo "Skipping..."
+elif [ "$yesorno" = e ]; then
+	echo "Goodbye!"
+	exit 1
+else
+	echo "Not a valid answer. Exiting..."
+	exit 1
+fi
