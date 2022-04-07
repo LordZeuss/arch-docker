@@ -12,35 +12,247 @@ ___  ____ _  _ ____    _ _  _ ____ ___ ____ _    _    ____ ____
 #This script will install portainer, sonarr, radarr, and jackett.
 
 ######################################################################
+mkdir /home/$USER/arch-docker/Containers
 
-#Install Portainer
-
-echo "Would you like to install Portainer (Required if not already insalled)? (y/n/e)"
+#Pre-usage
+echo "NOTICE: You need to edit the script to map the paths for certain containers (such as torrent clients and things such as sonarr)"
+echo "Please view the script's code and edit the paths for containers that need a path. You may not need to change anything depending on the containers you add. Double check the code to be safe."
+echo " "
+echo " "
+echo "Would you like to continue to installing the containers? (y/n/e)"
+echo "y=yes | n=no | e=exit-installer"
 
 read yesorno
 
 if [ "$yesorno" = y ]; then
-	echo "portainer:
-  container_name: portainer
-  restart: unless-stopped
-  ports:
-   - 9000:9000
-  volumes:
-   - /var/run/docker.sock:/var/run/docker.sock
-   - /home/dockeras/portainer:/data
-  environment:
-   - PUID=1000
-   - PGID=150
-   - TZ=US/Eastern
-  image: portainer/portainer" >> /home/$USER/arch-docker/docker-compose.yml		#replace /home/$USER/arch-docker/docker-compose.yml with the location of your docker-compose.yml file
-echo " " >>/home/$USER/arch-docker/docker-compose.yml #replace this location with the location docker-compose.yml if needed.
-echo "Successfully Added"
+	echo "Continuing..."
+	echo " "
 elif [ "$yesorno" = n ]; then
-	echo "Skipping..."
-elif [ "$yesorno" = e ]; then
-	echo "Goodbye!"
-	exit 1
+	echo "Exiting. Goodbye!"
+	echo " "
 else
 	echo "Not a valid answer. Exiting..."
 	exit 1
 fi
+
+
+#Install Portainer
+
+echo "Would you like to install Portainer (Required)? (y/n/e)"
+
+read yesorno
+
+if [ "$yesorno" = y ]; then
+	docker volume create portainer_data
+	docker run -d \
+  -p 8000:8000 -p 9000:9000 \
+  --name portainer \
+  --restart=always \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v portainer_data:/data \
+  portainer/portainer-ce
+	echo " "
+	echo "Completed."
+	echo " "
+elif [ "$yesorno" = n ]; then
+	echo "Skipping..."
+	echo " "
+else
+	echo "Not a valid answer. Exiting..."
+	exit 1
+fi
+
+#Install Sonarr
+
+echo "Would you like to install Sonarr? (y/n/e)"
+
+read yesorno
+
+if [ "$yesorno" = y ]; then
+	mkdir /home/$USER/arch-docker/Containers/sonarr
+	docker run -d \
+  --name=sonarr \
+  -e PUID=1000 \
+  -e PGID=1000 \
+  -e TZ=UTC \
+  -p 8989:8989 \
+  -v /home/$USER/arch-docker/Containers/sonarr:/config \
+  -v /path/to/tvseries:/tv `#optional` \
+  -v /path/to/downloadclient-downloads:/downloads `#optional` \
+  --restart unless-stopped \
+  linuxserver/sonarr
+	echo " "
+	echo "Completed."
+	echo " "
+elif [ "$yesorno" = n ]; then
+	echo "Skipping..."
+	echo " "
+else
+	echo "Not a valid answer. Exiting..."
+	exit 1
+fi
+
+#Radarr
+
+echo "Would you like to install Radarr? (y/n/e)"
+
+read yesorno
+
+if [ "$yesorno" = y ]; then
+	mkdir /home/$USER/Containers/radarr
+	docker run -d \
+  --name=radarr \
+  -e PUID=1000 \
+  -e PGID=1000 \
+  -e TZ=UTC \
+  -p 7878:7878 \
+  -v /home/$USER/arch-docker:/config \
+  -v /path/to/movies:/movies `#optional` \
+  -v /path/to/downloadclient-downloads:/downloads `#optional` \
+  --restart unless-stopped \
+  linuxserver/radarr
+	echo " "
+	echo "Completed."
+	echo " "
+elif [ "$yesorno" = n ]; then
+	echo "Skipping..."
+	echo " "
+else
+	echo "Not a valid answer. Exiting..."
+	exit 1
+fi
+
+#Jackett
+
+echo "Would you like to install Jackett? (y/n/e)"
+
+read yesorno
+
+if [ "$yesorno" = y ]; then
+	mkdir /home/$USER/arch-docker/Containers/jackett
+	docker run -d \
+  --name=jackett \
+  -e PUID=1000 \
+  -e PGID=1000 \
+  -e TZ=UTC \
+  -e AUTO_UPDATE=true `#optional` \
+  -e RUN_OPTS=<run options here> `#optional` \
+  -p 9117:9117 \
+  -v /home/$USER/arch-docker/Containers/jackett:/config \
+  -v <path to blackhole>:/downloads \
+  --restart unless-stopped \
+  linuxserver/jackett
+	echo " "
+	echo "Completed."
+	echo " "
+elif [ "$yesorno" = n ]; then
+	echo "Skipping..."
+	echo " "
+else
+	echo "Not a valid answer. Exiting..."
+	exit 1
+fi
+
+#Transmission
+
+echo "Would you like to install Transmission (Torrent Client)? (y/n/e)"
+
+read yesorno
+
+if [ "$yesorno" = y ]; then
+	mkdir /home/$USER/arch-docker/Containers/transmission
+	docker run -d \
+  --name=transmission \
+  -e PUID=1000 \
+  -e PGID=1000 \
+  -e TZ=UTC \
+  -e TRANSMISSION_WEB_HOME=/combustion-release/ `#optional` \
+  -e USER=username `#optional` \
+  -e PASS=password `#optional` \
+  -e WHITELIST=iplist `#optional` \
+  -e PEERPORT=peerport `#optional` \
+  -e HOST_WHITELIST=dnsnane list `#optional` \
+  -p 9091:9091 \
+  -p 51413:51413 \
+  -p 51413:51413/udp \
+  -v /home/$USER/arch-docker/Containers/transmission:/config \
+  -v <path to downloads>:/downloads \
+  -v <path to watch folder>:/watch \
+  --restart unless-stopped \
+  linuxserver/transmission
+	echo " "
+	echo "Completed."
+	echo " "
+elif [ "$yesorno" = n ]; then
+	echo "Skipping..."
+	echo " "
+else
+	echo "Not a valid answer. Exiting..."
+	exit 1
+fi
+
+#Deluge
+
+echo "Would you like to install Deluge (Torrent Client)? (y/n/e)"
+
+read yesorno
+
+if [ "$yesorno" = y ]; then
+	mkdir /home/$USER/arch-docker/Containers/deluge
+	docker run -d \
+  --name=deluge \
+  -e PUID=1000 \
+  -e PGID=1000 \
+  -e TZ=UTC \
+  -e DELUGE_LOGLEVEL=error `#optional` \
+  -p 8112:8112 \
+  -p 6881:6881 \
+  -p 6881:6881/udp \
+  -v /home/$USER/arch-docker/Containers/deluge:/config \
+  -v /path/to/your/downloads:/downloads \
+  --restart unless-stopped \
+  linuxserver/deluge
+	echo " "
+	echo "Completed."
+	echo " "
+elif [ "$yesorno" = n ]; then
+	echo "Skipping..."
+	echo " "
+else
+	echo "Not a valid answer. Exiting..."
+	exit 1
+fi
+
+#qBittorrent
+
+echo "Would you like to install qBittorrent (Torrent Client)? (y/n/e)"
+
+read yesorno
+
+if [ "$yesorno" = y ]; thenS/Central
+	mkdir /home/$USER/arch-docker/Containers/qbittorrent
+	docker run -d \
+  --name=qbittorrent \
+  -e PUID=1000 \
+  -e PGID=1000 \
+  -e TZ=UTC \
+  -e WEBUI_PORT=8080 \
+  -p 8080:8080 \
+  -p 6881:6881 \
+  -p 6881:6881/udp \
+  -v /home/$USER/arch-docker/Containers/qbittorrent:/config \
+  -v /path/to/downloads:/downloads \
+  --restart unless-stopped \
+  linuxserver/qbittorrent
+	echo " "
+	echo "Completed."
+	echo " "
+elif [ "$yesorno" = n ]; then
+	echo "Skipping..."
+	echo " "
+else
+	echo "Not a valid answer. Exiting..."
+	exit 1
+fi
+
+echo "Goodbye!"
