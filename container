@@ -103,14 +103,14 @@ echo "Would you like to install Radarr? (y/n/e)"
 read yesorno
 
 if [ "$yesorno" = y ]; then
-	mkdir /home/$USER/Containers/radarr
+	mkdir /home/$USER/arch-docker/Containers/radarr
 	docker run -d \
   --name=radarr \
   -e PUID=1000 \
   -e PGID=1000 \
   -e TZ=US/Central \
   -p 7878:7878 \
-  -v /home/$USER/arch-docker:/config \
+  -v /home/$USER/arch-docker/radarr:/config \
   -v /path/to/movies:/movies `#optional` \
   -v /path/to/downloadclient-downloads:/downloads `#optional` \
   --restart unless-stopped \
@@ -206,6 +206,36 @@ if [ "$yesorno" = y ]; then
   -v /path/to/downloadclient-downloads:/downloads `#optional` \
   --restart unless-stopped \
   linuxserver/readarr:develop
+	echo " "
+	echo "Completed."
+	echo " "
+elif [ "$yesorno" = n ]; then
+	echo "Skipping..."
+	echo " "
+else
+	echo "Not a valid answer. Exiting..."
+	exit 1
+fi
+
+#Lidarr (Music)
+
+echo "Would you like to install Lidarr (Music)? (y/n/e)"
+
+read yesorno
+
+if [ "$yesorno" = y ]; then
+	mkdir /home/$USER/arch-docker/Containers/lidarr
+	docker run -d \
+  --name=lidarr \
+  -e PUID=1000 \
+  -e PGID=1000 \
+  -e TZ=US/Central \
+  -p 8686:8686 \
+  -v /home/$USER/arch-docker/Containers/lidarr:/config \
+  -v /path/to/music:/music `#optional` \
+  -v /path/to/downloads:/downloads `#optional` \
+  --restart unless-stopped \
+  linuxserver/lidarr
 	echo " "
 	echo "Completed."
 	echo " "
