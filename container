@@ -9,6 +9,10 @@ ___  ____ _  _ ____    _ _  _ ____ ___ ____ _    _    ____ ____
 
 #This is a script to help install essentials for docker.
 
+#ERROR FIX: If you are getting an issue where permission is denied while trying to connect to docker daemon socket, you may need to run this script after running the following command:
+#exec su -l $USER
+#Put in your password and then try running the script again.
+
 #This script will install portainer, sonarr, radarr, and jackett.
 
 ######################################################################
